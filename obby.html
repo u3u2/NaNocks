@@ -1,10 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><plasmo-csui></plasmo-csui><head>
   <meta charset="UTF-8">
-  <title>game</title>
+  <title>Making Game!...</title>
   <style>
-      
       :root { color-scheme: light !important; }
       * { border-radius: 0 !important; box-shadow: none !important; text-shadow: none !important; }
       
@@ -19,7 +17,7 @@
       height: 100%;
       overflow: hidden;
       font-family: Arial, sans-serif;
-      background-color: #000;
+      background-color: #ffffff;
     }
     #canvas-container {
       width: 100%;
@@ -42,7 +40,7 @@
     }
     #fp-viewmodel {
       position: absolute;
-      bottom: 0;
+      bottom: 55px; 
       right: 0;
       pointer-events: none;
       z-index: 5;
@@ -59,45 +57,143 @@
       top: 10px;
       left: 10px;
       z-index: 10;
-      background: rgba(0, 0, 0, 0);
-      color: #fff;
+      background: #f2f2f2;
+      color: #111;
       padding: 8px 12px;
+      border: 1px solid #ccc;
       border-radius: 4px;
       font-family: monospace;
       font-size: 12px;
     }
     #room-ui input {
-      background: rgba(0, 0, 0, 0);
-      border: 1px solid #555;
-      color: #00ff66;
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #111;
       padding: 4px;
       width: 80px;
       border-radius: 3px;
       font-weight: bold;
     }
     #room-ui button {
-      background: #fffff;
-      border: none;
-      color: rgba(0, 0, 0, 0);
+      background: #e0e0e0;
+      border: 1px solid #ccc;
+      color: #111;
       padding: 4px 8px;
       cursor: pointer;
       border-radius: 3px;
       font-weight: bold;
     }
+
+    /* Editor UI Styles */
+    #editor-ui {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+      background: #f2f2f2;
+      color: #111;
+      border-top: 1px solid #ccc;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    #editor-ui b { color: #0077ff; margin-right: 4px; }
+    
+    .mode-btn-container { display: flex; gap: 4px; }
+    .mode-btn { background: #ffffff; border: 1px solid #ccc; color: #111; padding: 6px; cursor: pointer; font-weight: bold; }
+    .mode-btn.active { background: #0077ff; color: #fff; border-color: #0077ff; }
+
+    #editor-ui label { display: flex; align-items: center; gap: 4px; color: #111; }
+    #editor-ui input, #editor-ui select {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #111;
+      padding: 4px;
+      border-radius: 3px;
+      width: 55px;
+    }
+    #editor-ui input#ed-color { width: 40px; height: 26px; padding: 0; cursor: pointer; }
+    #editor-ui select { width: auto; }
+    #editor-ui button.action-btn {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #111;
+      padding: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #editor-ui button.action-btn:hover { background: #e0e0e0; }
+
+    /* Explorer UI Styles */
+    #explorer-ui {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 160px;
+      height: calc(100% - 55px);
+      z-index: 10;
+      background: #f2f2f2;
+      color: #111;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      border-left: 1px solid #ccc;
+    }
+    #explorer-ui b { color: #0077ff; text-align: center; margin-bottom: 5px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+    .explorer-item {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #111;
+      padding: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    .explorer-item:hover { background: #e0e0e0; }
+    .explorer-item.selected { background: #0077ff; color: #fff; border-color: #0077ff; }
+
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
-</head>
+<style id="custom-cursor" type="text/css">body button, body [type='button'], body input[type='reset'], body input[type='submit'], body [role="button"], ::-webkit-search-cancel-button, ::-webkit-search-decoration, ::-webkit-scrollbar-button, ::-webkit-file-upload-button, [role^=button], .cc_pointer, [type="search"]::-webkit-search-cancel-button, a, select, [type="search"]::-webkit-search-decoration, .paper-button, .ytp-progress-bar-container, input[type=submit], :link, :visited, a > *, img,  ::-webkit-scrollbar-button, .ogdlpmhglpejoiomcodnpjnfgcpmgale_pointer, ::-webkit-file-upload-button, .ytp-volume-panel, #myogdlpmhglpejoiomcodnpjnfgcpmgale .icon, body .custom-cursor-on-hover {cursor: url("data:image/png;base64,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") 7 4, pointer !important;} html,body,body select,body .custom-cursor-default-hover {cursor: url("data:image/png;base64,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") 7 4, auto !important;}</style><style id="universal-bg-styles"></style><style id="glass-style"></style><style id="bg-spinner-styles">
+                .universal-spinner {
+                    position: fixed; top: 20px; right: 20px; width: 24px; height: 24px;
+                    border: 3px solid rgba(0,0,0,0.1); border-radius: 50%;
+                    border-top-color: #007bff; animation: bg-spin 1s linear infinite;
+                    z-index: 2147483647; pointer-events: none; opacity: 0; transition: opacity 0.2s;
+                }
+                .universal-spinner.visible { opacity: 1; }
+                @keyframes bg-spin { to { transform: rotate(360deg); } }
+            </style></head>
 <body>
 
   <div id="canvas-container"></div>
+  
   <div id="room-ui">
-     <span id="my-code" style="color:#00ff66; font-weight:bold;">0000</span>  
+     <span id="my-code" style="color:#0077ff; font-weight:bold;">0000</span>  
      <input id="code-input" type="number" placeholder="0000"><button id="join-btn">.</button>
+     
   </div>
 
-  <img id="player-dom-img" class="player-dom-img" src="https://www.image2url.com/r2/default/files/1788546023187-9bf757bf-488e-4348-afa2-1fb5270e280c.png" alt="player">
-  <img id="fp-viewmodel" src="https://shy-grass-406.linkyhost.com/?raw=true" alt="fp overlay">
+  
+
+  
+
+  <img id="player-dom-img" class="player-dom-img" src="https://www.image2url.com/r2/default/files/1788547549853-729997a8-a11d-411b-a4bb-37ee12cc8c60.png" alt="player" style="display: block; left: 650px; top: 324.983px; width: 81.3918px;">
+  <img id="fp-viewmodel" src="https://shy-grass-406.linkyhost.com/?raw=true" alt="fp overlay" style="display: none;">
 
   <div class="preload-imgs">
     <img id="img-back" src="https://www.image2url.com/r2/default/files/1788546023187-9bf757bf-488e-4348-afa2-1fb5270e280c.png" alt="back">
@@ -143,6 +239,94 @@
     peer.on('connection', (conn) => {
       setupConnection(conn);
     });
+
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', saveGameState);
+    }
+
+    function saveGameState() {
+      if (tControls.object) {
+        const mesh = tControls.object;
+        const block = blockObjects.find(b => b.mesh === mesh);
+        if (block) {
+          const currentW = block.w * mesh.scale.x;
+          const currentH = block.h * mesh.scale.y;
+          const currentD = block.d * mesh.scale.z;
+          block.x = mesh.position.x;
+          block.y = mesh.position.y - currentH / 2;
+          block.z = mesh.position.z;
+          block.w = currentW;
+          block.h = currentH;
+          block.d = currentD;
+        }
+      }
+
+      if (blockObjects.length === 0) {
+        if (!confirm('No blocks currently exist in the scene, so this save will start with an empty world. Continue anyway?')) {
+          return;
+        }
+      }
+
+      let blockLines = '';
+      blockObjects.forEach(b => {
+        const hex = '0x' + (b.color >>> 0).toString(16).padStart(6, '0');
+        blockLines += `    addBlock(${b.x}, ${b.y}, ${b.z}, ${b.w}, ${b.h}, ${b.d}, ${hex});\n`;
+      });
+
+      const docClone = document.documentElement.cloneNode(true);
+
+      const canvasContainerClone = docClone.querySelector('#canvas-container');
+      if (canvasContainerClone) canvasContainerClone.innerHTML = '';
+
+      docClone.querySelectorAll('.player-dom-img').forEach((img) => {
+        if (img.id !== 'player-dom-img') img.remove();
+      });
+
+      const edSelectClone = docClone.querySelector('#ed-select');
+      if (edSelectClone) edSelectClone.innerHTML = '<option value="">-- None Selected --</option>';
+
+      const explorerListClone = docClone.querySelector('#explorer-list');
+      if (explorerListClone) explorerListClone.innerHTML = '';
+
+      const myCodeClone = docClone.querySelector('#my-code');
+      if (myCodeClone) myCodeClone.innerText = '0000';
+
+      const editorUiClone = docClone.querySelector('#editor-ui');
+      if (editorUiClone) editorUiClone.remove();
+
+      const explorerUiClone = docClone.querySelector('#explorer-ui');
+      if (explorerUiClone) explorerUiClone.remove();
+
+      const saveBtnClone = docClone.querySelector('#save-btn');
+      if (saveBtnClone) saveBtnClone.remove();
+
+      let html = '<!DOCTYPE html>\n' + docClone.outerHTML;
+
+      const startMarker = '// ' + '=== INITIAL_BLOCKS_START ===';
+      const endMarker = '// ' + '=== INITIAL_BLOCKS_END ===';
+      const startIdx = html.indexOf(startMarker);
+      const endIdx = html.indexOf(endMarker);
+
+      if (startIdx !== -1 && endIdx !== -1) {
+        const before = html.substring(0, startIdx + startMarker.length);
+        const after = html.substring(endIdx);
+        html = before + '\n' + blockLines + '    ' + after;
+      } else {
+        alert('Could not find save markers in the page source, save failed.');
+        return;
+      }
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'game1.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
 
     joinBtn.addEventListener('click', () => {
       const pinVal = codeInput.value.trim();
@@ -190,29 +374,6 @@
       remotePlayers[id] = { x: 0, y: 1, z: 0, sprite: backUrl, element: img };
     }
 
-    let camYaw = 0;   
-    let camPitch = 0.3; 
-    let isDragging = false;
-    let prevMouseX = 0;
-    let prevMouseY = 0;
-
-    window.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      prevMouseX = e.clientX;
-      prevMouseY = e.clientY;
-    });
-
-    window.addEventListener('mouseup', () => { isDragging = false; });
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging || !isThirdPerson) return;
-      const deltaX = e.clientX - prevMouseX;
-      const deltaY = e.clientY - prevMouseY;
-      camYaw -= deltaX * 0.008;
-      camPitch = Math.max(0.05, Math.min(1.2, camPitch + deltaY * 0.008));
-      prevMouseX = e.clientX;
-      prevMouseY = e.clientY;
-    });
-
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
 
@@ -247,6 +408,309 @@
     const colliders = [];
     const mapLimit = 145;
 
+    const edSelect = document.getElementById('ed-select');
+    const explorerList = document.getElementById('explorer-list');
+    const edX = document.getElementById('ed-x');
+    const edY = document.getElementById('ed-y');
+    const edZ = document.getElementById('ed-z');
+    const edW = document.getElementById('ed-w');
+    const edH = document.getElementById('ed-h');
+    const edD = document.getElementById('ed-d');
+    const edColor = document.getElementById('ed-color');
+    const edApply = document.getElementById('ed-apply');
+    const edDelete = document.getElementById('ed-delete');
+    const edAdd = document.getElementById('ed-add');
+    const btnModeMove = document.getElementById('ed-mode-move');
+    const btnModeScale = document.getElementById('ed-mode-scale');
+
+    let blockObjects = [];
+    let blockIdCounter = 0;
+    
+    const tControls = new THREE.TransformControls(camera, renderer.domElement);
+    scene.add(tControls);
+    let isDraggingTControls = false;
+
+    if (btnModeMove) {
+      btnModeMove.addEventListener('click', () => {
+        tControls.setMode('translate');
+        btnModeMove.classList.add('active');
+        btnModeScale.classList.remove('active');
+      });
+    }
+
+    if (btnModeScale) {
+      btnModeScale.addEventListener('click', () => {
+        tControls.setMode('scale');
+        btnModeScale.classList.add('active');
+        btnModeMove.classList.remove('active');
+      });
+    }
+
+    tControls.addEventListener('change', () => {
+      if (!tControls.object) return;
+      const mesh = tControls.object;
+      const block = blockObjects.find(b => b.mesh === mesh);
+      if (!block) return;
+
+      let currentW = block.w;
+      let currentH = block.h;
+      let currentD = block.d;
+
+      if (tControls.getMode() === 'scale') {
+         currentW = block.w * mesh.scale.x;
+         currentH = block.h * mesh.scale.y;
+         currentD = block.d * mesh.scale.z;
+      }
+
+      const newX = mesh.position.x;
+      const newY = mesh.position.y - currentH / 2;
+      const newZ = mesh.position.z;
+
+      if (edX) {
+        edX.value = newX.toFixed(2);
+        edY.value = newY.toFixed(2);
+        edZ.value = newZ.toFixed(2);
+        
+        if (tControls.getMode() === 'scale') {
+           edW.value = currentW.toFixed(2);
+           edH.value = currentH.toFixed(2);
+           edD.value = currentD.toFixed(2);
+        }
+      }
+
+      block.collider.minX = newX - currentW / 2;
+      block.collider.maxX = newX + currentW / 2;
+      block.collider.minY = newY;
+      block.collider.maxY = newY + currentH;
+      block.collider.minZ = newZ - currentD / 2;
+      block.collider.maxZ = newZ + currentD / 2;
+    });
+
+    tControls.addEventListener('dragging-changed', (e) => {
+        isDraggingTControls = e.value;
+        if (!e.value && tControls.object) {
+            const mesh = tControls.object;
+            const block = blockObjects.find(b => b.mesh === mesh);
+            if (block) {
+                const currentW = block.w * mesh.scale.x;
+                const currentH = block.h * mesh.scale.y;
+                const currentD = block.d * mesh.scale.z;
+                
+                block.x = mesh.position.x;
+                block.y = mesh.position.y - currentH / 2;
+                block.z = mesh.position.z;
+                
+                block.w = currentW;
+                block.h = currentH;
+                block.d = currentD;
+
+                mesh.geometry.dispose();
+                mesh.geometry = new THREE.BoxGeometry(block.w, block.h, block.d);
+                mesh.scale.set(1, 1, 1);
+                mesh.position.set(block.x, block.y + block.h / 2, block.z);
+
+                tControls.detach();
+                tControls.attach(mesh);
+            }
+        }
+    });
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    let camYaw = 0;   
+    let camPitch = 0.3; 
+    let isDragging = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+
+    window.addEventListener('mousedown', (e) => {
+      if(e.target.closest('#editor-ui') || e.target.closest('#room-ui') || e.target.closest('#explorer-ui')) return;
+      if (isDraggingTControls) return; 
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      
+      if (edSelect) {
+        raycaster.setFromCamera(mouse, camera);
+        
+        const meshes = blockObjects.map(b => b.mesh);
+        const intersects = raycaster.intersectObjects(meshes);
+
+        if (intersects.length > 0) {
+          const hitMesh = intersects[0].object;
+          const block = blockObjects.find(b => b.mesh === hitMesh);
+          if (block) {
+            edSelect.value = block.id;
+            loadSelectedBlock(); 
+          }
+        } else {
+          edSelect.value = "";
+          loadSelectedBlock();
+        }
+      }
+
+      isDragging = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    
+    window.addEventListener('mousemove', (e) => {
+      if (isDraggingTControls) return; 
+      if (!isDragging || !isThirdPerson) return;
+      const deltaX = e.clientX - prevMouseX;
+      const deltaY = e.clientY - prevMouseY;
+      camYaw -= deltaX * 0.008;
+      camPitch = Math.max(0.05, Math.min(1.2, camPitch + deltaY * 0.008));
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+
+    function updateExplorerHighlights() {
+      if (!explorerList || !edSelect) return;
+      const items = explorerList.getElementsByClassName('explorer-item');
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].dataset.id === edSelect.value) {
+          items[i].classList.add('selected');
+        } else {
+          items[i].classList.remove('selected');
+        }
+      }
+    }
+
+    function updateBlockSelect() {
+      if (!edSelect || !explorerList) return;
+      const currentVal = edSelect.value;
+      edSelect.innerHTML = '<option value="">-- None Selected --</option>';
+      explorerList.innerHTML = '';
+      
+      blockObjects.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.innerText = `Block ${b.id}`;
+        edSelect.appendChild(opt);
+
+        const expItem = document.createElement('div');
+        expItem.className = 'explorer-item';
+        expItem.dataset.id = b.id;
+        
+        const hexColor = b.color.toString(16).padStart(6, '0');
+        expItem.innerHTML = `<span style="display:inline-block;width:10px;height:10px;background-color:#${hexColor};margin-right:6px;border:1px solid #999;"></span>Block ${b.id}`;
+        
+        expItem.onclick = () => {
+          edSelect.value = b.id;
+          loadSelectedBlock();
+        };
+        explorerList.appendChild(expItem);
+      });
+      
+      if (currentVal) {
+          edSelect.value = currentVal;
+          updateExplorerHighlights();
+      }
+    }
+
+    function loadSelectedBlock() {
+      if (!edSelect) {
+        tControls.detach();
+        return;
+      }
+      if (!edSelect.value) {
+        edX.value = ''; edY.value = ''; edZ.value = '';
+        edW.value = ''; edH.value = ''; edD.value = ''; edColor.value = '#ffffff';
+        tControls.detach();
+        updateExplorerHighlights();
+        return;
+      }
+      const block = blockObjects.find(b => b.id == edSelect.value);
+      if (block) {
+        edX.value = block.x.toFixed(2);
+        edY.value = block.y.toFixed(2);
+        edZ.value = block.z.toFixed(2);
+        edW.value = block.w.toFixed(2);
+        edH.value = block.h.toFixed(2);
+        edD.value = block.d.toFixed(2);
+        edColor.value = '#' + block.color.toString(16).padStart(6, '0');
+        tControls.attach(block.mesh);
+      }
+      updateExplorerHighlights();
+    }
+
+    if (edSelect) {
+      edSelect.addEventListener('change', loadSelectedBlock);
+    }
+
+    if (edApply) {
+      edApply.addEventListener('click', () => {
+        if (!edSelect.value) return;
+        const block = blockObjects.find(b => b.id == edSelect.value);
+        if (block) {
+          const nx = parseFloat(edX.value) || 0;
+          const ny = parseFloat(edY.value) || 0;
+          const nz = parseFloat(edZ.value) || 0;
+          const nw = parseFloat(edW.value) || 1;
+          const nh = parseFloat(edH.value) || 1;
+          const nd = parseFloat(edD.value) || 1;
+          const nc = parseInt(edColor.value.replace('#', '0x'), 16) || 0xffffff;
+
+          block.mesh.geometry.dispose();
+          block.mesh.geometry = new THREE.BoxGeometry(nw, nh, nd);
+          block.mesh.material.color.setHex(nc);
+          block.mesh.position.set(nx, ny + nh / 2, nz);
+          block.mesh.scale.set(1, 1, 1);
+
+          block.x = nx; block.y = ny; block.z = nz;
+          block.w = nw; block.h = nh; block.d = nd;
+          block.color = nc;
+
+          block.collider.minX = nx - nw / 2;
+          block.collider.maxX = nx + nw / 2;
+          block.collider.minY = ny;
+          block.collider.maxY = ny + nh;
+          block.collider.minZ = nz - nd / 2;
+          block.collider.maxZ = nz + nd / 2;
+
+          if (tControls.object === block.mesh) {
+              tControls.detach();
+              tControls.attach(block.mesh);
+          }
+          
+          updateBlockSelect(); 
+        }
+      });
+    }
+
+    if (edDelete) {
+      edDelete.addEventListener('click', () => {
+        if (!edSelect.value) return;
+        const id = edSelect.value;
+        const index = blockObjects.findIndex(b => b.id == id);
+        if (index > -1) {
+          const block = blockObjects[index];
+          tControls.detach();
+          scene.remove(block.mesh);
+          
+          const colIndex = colliders.indexOf(block.collider);
+          if (colIndex > -1) colliders.splice(colIndex, 1);
+          
+          blockObjects.splice(index, 1);
+          edSelect.value = "";
+          updateBlockSelect();
+          loadSelectedBlock();
+        }
+      });
+    }
+
+    if (edAdd) {
+      edAdd.addEventListener('click', () => {
+        addBlock(0, 0, 0, 2, 2, 2, 0xffffff);
+        edSelect.value = blockIdCounter;
+        loadSelectedBlock();
+      });
+    }
+
     function addBlock(x, y, z, w, h, d, color) {
       const geo = new THREE.BoxGeometry(w, h, d);
       const mat = new THREE.MeshLambertMaterial({ color: color, flatShading: true });
@@ -256,18 +720,35 @@
       mesh.receiveShadow = true;
       scene.add(mesh);
 
-      colliders.push({
+      const collider = {
         minX: x - w / 2, maxX: x + w / 2,
         minY: y, maxY: y + h,
         minZ: z - d / 2, maxZ: z + d / 2
+      };
+      colliders.push(collider);
+
+      blockIdCounter++;
+      blockObjects.push({
+        id: blockIdCounter,
+        x: x, y: y, z: z, w: w, h: h, d: d, color: color,
+        mesh: mesh, collider: collider
       });
+
+      updateBlockSelect();
     }
 
-    addBlock(-8, 0, -10, 4, 0.6, 4, 0xaaaaaa);
-    addBlock(5, 0, 5, 3, 2, 3, 0xff0055);
-    addBlock(-6, 0, 6, 3, 3, 3, 0x0055ff);
-    addBlock(10, 0, -5, 2, 4, 2, 0xffaa00);
-    addBlock(0, 0, 12, 4, 2, 4, 0xaa00ff);
+    // === INITIAL_BLOCKS_START ===
+    addBlock(-8, 0, -10, 4, 0.6, 4, 0x034002);
+    addBlock(5.53, -0.25, 5, 3, 2, 3, 0x1b5903);
+    addBlock(-6, -0.7536273209470532, -3.664867328279861, 0.9230005199532318, 4.507254641894106, 1.0275604345046843, 0x8a4900);
+    addBlock(10, 985.53, -5, -983.53, -1967.06, -983.53, 0x0f3410);
+    addBlock(6.83, 0, 1.61, 4, 2, 4, 0x275016);
+    addBlock(-5.92, 2.75, -3.68, 2.94, 0.88, 2.94, 0x246b0a);
+    addBlock(-6.048350963942851, 3.0173058688997827, -3.708694390348624, 2, 2, 2, 0x256f0a);
+    addBlock(5.57, -0.35, 0, 2, 2.7, 2, 0x236709);
+    addBlock(6.11, -0.42, -1.19, 3.57, 2.19, 2, 0x1a4d07);
+    addBlock(6.69, 0, 6.29, 2, 2, 2, 0x20540d);
+    // === INITIAL_BLOCKS_END ===
 
     function checkHorizontalCollision(px, pz, pyHeight) {
       const radius = 0.45;
@@ -309,12 +790,14 @@
     let lastSend = 0;
 
     window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
       keys[e.key.toLowerCase()] = true;
       if (e.key === ' ') e.preventDefault();
       if (e.key.toLowerCase() === 'v') isThirdPerson = !isThirdPerson;
     });
 
     window.addEventListener('keyup', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
       keys[e.key.toLowerCase()] = false;
     });
 
@@ -488,5 +971,6 @@
 
     animate();
   </script>
-</body>
-</html>
+
+
+</body></html>
