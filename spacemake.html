@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>game</title>
+  <style>
+      :root { color-scheme: light !important; }
+      * { border-radius: 0 !important; box-shadow: none !important; text-shadow: none !important; }
+      
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      background-image: url('https://www.image2url.com/r2/default/images/1788642087747-84259b91-eb25-4f3f-b0a5-10b2a441c4cf.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    canvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .player-dom-img {
+      position: absolute;
+      pointer-events: none;
+      z-index: 5;
+      transform: translate(-50%, -50%);
+      image-rendering: pixelated;
+    }
+    #fp-viewmodel {
+      position: absolute;
+      bottom: 55px; 
+      right: 0;
+      pointer-events: none;
+      z-index: 5;
+      display: none;
+      max-height: 45vh;
+      max-width: 45vw;
+      image-rendering: pixelated;
+    }
+    .preload-imgs {
+      display: none;
+    }
+    #room-ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: #f2f2f2;
+      color: #111;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    #room-ui input {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #111;
+      padding: 4px;
+      width: 80px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+    #room-ui button {
+      background: #e0e0e0;
+      border: 1px solid #ccc;
+      color: #111;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+
+    /* Editor UI Styles */
+    #editor-ui {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+      background: #f2f2f2;
+      color: #111;
+      border-top: 1px solid #ccc;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    #editor-ui b { color: #0077ff; margin-right: 4px; }
+    
+    .mode-btn-container { display: flex; gap: 4px; }
+    .mode-btn { background: #ffffff; border: 1px solid #ccc; color: #111; padding: 6px; cursor: pointer; font-weight: bold; }
+    .mode-btn.active { background: #0077ff; color: #fff; border-color: #0077ff; }
+
+    #editor-ui label { display: flex; align-items: center; gap: 4px; color: #111; }
+    #editor-ui input, #editor-ui select {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #111;
+      padding: 4px;
+      border-radius: 3px;
+      width: 55px;
+    }
+    #editor-ui input#ed-color { width: 40px; height: 26px; padding: 0; cursor: pointer; }
+    #editor-ui select { width: auto; }
+    #editor-ui button.action-btn {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #111;
+      padding: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #editor-ui button.action-btn:hover { background: #e0e0e0; }
+
+    /* Explorer UI Styles */
+    #explorer-ui {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 160px;
+      height: calc(100% - 55px);
+      z-index: 10;
+      background: #f2f2f2;
+      color: #111;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      border-left: 1px solid #ccc;
+    }
+    #explorer-ui b { color: #0077ff; text-align: center; margin-bottom: 5px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+    .explorer-item {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      color: #111;
+      padding: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    .explorer-item:hover { background: #e0e0e0; }
+    .explorer-item.selected { background: #0077ff; color: #fff; border-color: #0077ff; }
+
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+  
+  <div id="room-ui">
+     <span id="my-code" style="color:#0077ff; font-weight:bold;">0000</span>  
+     <input id="code-input" type="number" placeholder="0000"><button id="join-btn">.</button>
+     <button id="save-btn" title="Download this world as a self-contained HTML file with the current blocks baked in">save world</button>
+  </div>
+
+  <div id="explorer-ui">
+    <b>block explorer</b>
+    <div id="explorer-list"></div>
+  </div>
+
+  <div id="editor-ui">
+    <b>object editor</b>
+    
+    <div class="mode-btn-container">
+      <button id="ed-mode-move" class="mode-btn active">Move</button>
+      <button id="ed-mode-scale" class="mode-btn">Resize</button>
+    </div>
+
+    <select id="ed-select">
+        <option value="">-- None Selected --</option>
+    </select>
+    <label>X: <input type="number" id="ed-x" step="0.5"></label>
+    <label>Y: <input type="number" id="ed-y" step="0.5"></label>
+    <label>Z: <input type="number" id="ed-z" step="0.5"></label>
+    <label>W: <input type="number" id="ed-w" step="0.5"></label>
+    <label>H: <input type="number" id="ed-h" step="0.5"></label>
+    <label>D: <input type="number" id="ed-d" step="0.5"></label>
+    <label>Color: <input type="color" id="ed-color" value="#ffffff"></label>
+    <button id="ed-apply" class="action-btn">apply changes</button>
+    <button id="ed-delete" class="action-btn">remove object</button>
+    <button id="ed-add" class="action-btn">add new object</button>
+  </div>
+
+  <img id="player-dom-img" class="player-dom-img" src="https://www.image2url.com/r2/default/files/1788546023187-9bf757bf-488e-4348-afa2-1fb5270e280c.png" alt="player">
+  <img id="fp-viewmodel" src="https://shy-grass-406.linkyhost.com/?raw=true" alt="fp overlay">
+
+  <div class="preload-imgs">
+    <img id="img-back" src="https://www.image2url.com/r2/default/files/1788546023187-9bf757bf-488e-4348-afa2-1fb5270e280c.png" alt="back">
+    <img id="img-left" src="https://www.image2url.com/r2/default/files/1788547401571-85158778-58e9-4374-b100-c3762d1eb776.png" alt="left">
+    <img id="img-front" src="https://www.image2url.com/r2/default/files/1788547217840-8180e142-db1c-47dc-8d58-7a35d51614ee.png" alt="front">
+    <img id="img-right" src="https://www.image2url.com/r2/default/files/1788547549853-729997a8-a11d-411b-a4bb-37ee12cc8c60.png" alt="right">
+    <img id="img-jump" src="https://www.image2url.com/r2/default/files/1788545962230-0ff3ac8a-5e1a-4a5b-bf42-500440e33f1d.png" alt="jump">
+    <img id="img-jump-front" src="https://www.image2url.com/r2/default/images/1788630480291-100ae62a-30bc-4efd-a90a-67cbd6d616b4.png" alt="jump front">
+    <img id="img-walk1" src="https://www.image2url.com/r2/default/files/1788548519310-78426da9-0896-4283-912f-3177b7dd0c02.png" alt="walk1">
+    <img id="img-walk2" src="https://www.image2url.com/r2/default/files/1788548447922-c13f3bdf-7a15-4a1e-91c4-546852ba5f3f.png" alt="walk2">
+    <img id="img-walkback1" src="https://www.image2url.com/r2/default/images/1788629643848-159332e7-d036-4a90-ac05-ef03cda391c8.png" alt="walkback1">
+    <img id="img-walkback2" src="https://www.image2url.com/r2/default/images/1788629773442-28324f42-981e-4738-a4b1-d81ada06e921.png" alt="walkback2">
+  </div>
+
+  <script>
+    const backUrl  = 'https://www.image2url.com/r2/default/files/1788546023187-9bf757bf-488e-4348-afa2-1fb5270e280c.png';
+    const leftUrl  = 'https://www.image2url.com/r2/default/files/1788547401571-85158778-58e9-4374-b100-c3762d1eb776.png';
+    const frontUrl = 'https://www.image2url.com/r2/default/files/1788547217840-8180e142-db1c-47dc-8d58-7a35d51614ee.png';
+    const rightUrl = 'https://www.image2url.com/r2/default/files/1788547549853-729997a8-a11d-411b-a4bb-37ee12cc8c60.png';
+    const jumpUrl  = 'https://www.image2url.com/r2/default/files/1788545962230-0ff3ac8a-5e1a-4a5b-bf42-500440e33f1d.png';
+    const jumpFrontUrl = 'https://www.image2url.com/r2/default/images/1788630480291-100ae62a-30bc-4efd-a90a-67cbd6d616b4.png';
+    const walk1Url = 'https://www.image2url.com/r2/default/files/1788548519310-78426da9-0896-4283-912f-3177b7dd0c02.png';
+    const walk2Url = 'https://www.image2url.com/r2/default/files/1788548447922-c13f3bdf-7a15-4a1e-91c4-546852ba5f3f.png';
+    const walkBack1Url = 'https://www.image2url.com/r2/default/images/1788629643848-159332e7-d036-4a90-ac05-ef03cda391c8.png';
+    const walkBack2Url = 'https://www.image2url.com/r2/default/images/1788629773442-28324f42-981e-4738-a4b1-d81ada06e921.png';
+
+    const playerImgOverlay = document.getElementById('player-dom-img');
+    const fpViewmodel = document.getElementById('fp-viewmodel');
+    const myCodeSpan = document.getElementById('my-code');
+    const codeInput = document.getElementById('code-input');
+    const joinBtn = document.getElementById('join-btn');
+    const playerBaseSize = 75;
+
+    const numericPin = Math.floor(1000 + Math.random() * 9000).toString();
+    const peer = new Peer('blocky_' + numericPin);
+    const connections = {};
+    const remotePlayers = {};
+
+    peer.on('open', () => {
+      myCodeSpan.innerText = numericPin;
+    });
+
+    peer.on('connection', (conn) => {
+      setupConnection(conn);
+    });
+
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', saveGameState);
+    }
+
+    function saveGameState() {
+      if (tControls.object) {
+        const mesh = tControls.object;
+        const block = blockObjects.find(b => b.mesh === mesh);
+        if (block) {
+          const currentW = block.w * mesh.scale.x;
+          const currentH = block.h * mesh.scale.y;
+          const currentD = block.d * mesh.scale.z;
+          block.x = mesh.position.x;
+          block.y = mesh.position.y - currentH / 2;
+          block.z = mesh.position.z;
+          block.w = currentW;
+          block.h = currentH;
+          block.d = currentD;
+        }
+      }
+
+      if (blockObjects.length === 0) {
+        if (!confirm('No blocks currently exist in the scene, so this save will start with an empty world. Continue anyway?')) {
+          return;
+        }
+      }
+
+      let blockLines = '';
+      blockObjects.forEach(b => {
+        const hex = '0x' + (b.color >>> 0).toString(16).padStart(6, '0');
+        blockLines += `    addBlock(${b.x}, ${b.y}, ${b.z}, ${b.w}, ${b.h}, ${b.d}, ${hex});\n`;
+      });
+
+      const docClone = document.documentElement.cloneNode(true);
+
+      const canvasContainerClone = docClone.querySelector('#canvas-container');
+      if (canvasContainerClone) canvasContainerClone.innerHTML = '';
+
+      docClone.querySelectorAll('.player-dom-img').forEach((img) => {
+        if (img.id !== 'player-dom-img') img.remove();
+      });
+
+      const edSelectClone = docClone.querySelector('#ed-select');
+      if (edSelectClone) edSelectClone.innerHTML = '<option value="">-- None Selected --</option>';
+
+      const explorerListClone = docClone.querySelector('#explorer-list');
+      if (explorerListClone) explorerListClone.innerHTML = '';
+
+      const myCodeClone = docClone.querySelector('#my-code');
+      if (myCodeClone) myCodeClone.innerText = '0000';
+
+      const editorUiClone = docClone.querySelector('#editor-ui');
+      if (editorUiClone) editorUiClone.remove();
+
+      const explorerUiClone = docClone.querySelector('#explorer-ui');
+      if (explorerUiClone) explorerUiClone.remove();
+
+      const saveBtnClone = docClone.querySelector('#save-btn');
+      if (saveBtnClone) saveBtnClone.remove();
+
+      let html = '<!DOCTYPE html>\n' + docClone.outerHTML;
+
+      const startMarker = '// ' + '=== INITIAL_BLOCKS_START ===';
+      const endMarker = '// ' + '=== INITIAL_BLOCKS_END ===';
+      const startIdx = html.indexOf(startMarker);
+      const endIdx = html.indexOf(endMarker);
+
+      if (startIdx !== -1 && endIdx !== -1) {
+        const before = html.substring(0, startIdx + startMarker.length);
+        const after = html.substring(endIdx);
+        html = before + '\n' + blockLines + '    ' + after;
+      } else {
+        alert('Could not find save markers in the page source, save failed.');
+        return;
+      }
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'game1.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    joinBtn.addEventListener('click', () => {
+      const pinVal = codeInput.value.trim();
+      if (pinVal.length === 4) {
+        const targetFullId = 'blocky_' + pinVal;
+        if (targetFullId !== peer.id) {
+          const conn = peer.connect(targetFullId);
+          setupConnection(conn);
+        }
+      }
+    });
+
+    function setupConnection(conn) {
+      conn.on('open', () => {
+        connections[conn.peer] = conn;
+      });
+
+      conn.on('data', (data) => {
+        if (data.type === 'move') {
+          if (!remotePlayers[conn.peer]) {
+            createRemotePlayer(conn.peer);
+          }
+          const rp = remotePlayers[conn.peer];
+          rp.x = data.x;
+          rp.y = data.y;
+          rp.z = data.z;
+          rp.sprite = data.sprite;
+        }
+      });
+
+      conn.on('close', () => {
+        if (remotePlayers[conn.peer]) {
+          remotePlayers[conn.peer].element.remove();
+          delete remotePlayers[conn.peer];
+        }
+        delete connections[conn.peer];
+      });
+    }
+
+    function createRemotePlayer(id) {
+      const img = document.createElement('img');
+      img.className = 'player-dom-img';
+      img.src = backUrl;
+      document.body.appendChild(img);
+      remotePlayers[id] = { x: 0, y: 1, z: 0, sprite: backUrl, element: img };
+    }
+
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    sunLight.position.set(40, 60, -80);
+    sunLight.castShadow = true;
+    scene.add(sunLight);
+
+    const sunGeo = new THREE.SphereGeometry(10, 16, 16);
+    const sunMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+    sunMesh.position.copy(sunLight.position);
+    scene.add(sunMesh);
+
+    const groundGeo = new THREE.PlaneGeometry(300, 300);
+    const groundMat = new THREE.MeshLambertMaterial({ color: 0x00aa33, flatShading: true });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const colliders = [];
+    const mapLimit = 145;
+
+    const edSelect = document.getElementById('ed-select');
+    const explorerList = document.getElementById('explorer-list');
+    const edX = document.getElementById('ed-x');
+    const edY = document.getElementById('ed-y');
+    const edZ = document.getElementById('ed-z');
+    const edW = document.getElementById('ed-w');
+    const edH = document.getElementById('ed-h');
+    const edD = document.getElementById('ed-d');
+    const edColor = document.getElementById('ed-color');
+    const edApply = document.getElementById('ed-apply');
+    const edDelete = document.getElementById('ed-delete');
+    const edAdd = document.getElementById('ed-add');
+    const btnModeMove = document.getElementById('ed-mode-move');
+    const btnModeScale = document.getElementById('ed-mode-scale');
+
+    let blockObjects = [];
+    let blockIdCounter = 0;
+    
+    const tControls = new THREE.TransformControls(camera, renderer.domElement);
+    scene.add(tControls);
+    let isDraggingTControls = false;
+
+    if (btnModeMove) {
+      btnModeMove.addEventListener('click', () => {
+        tControls.setMode('translate');
+        btnModeMove.classList.add('active');
+        btnModeScale.classList.remove('active');
+      });
+    }
+
+    if (btnModeScale) {
+      btnModeScale.addEventListener('click', () => {
+        tControls.setMode('scale');
+        btnModeScale.classList.add('active');
+        btnModeMove.classList.remove('active');
+      });
+    }
+
+    tControls.addEventListener('change', () => {
+      if (!tControls.object) return;
+      const mesh = tControls.object;
+      const block = blockObjects.find(b => b.mesh === mesh);
+      if (!block) return;
+
+      let currentW = block.w;
+      let currentH = block.h;
+      let currentD = block.d;
+
+      if (tControls.getMode() === 'scale') {
+         currentW = block.w * mesh.scale.x;
+         currentH = block.h * mesh.scale.y;
+         currentD = block.d * mesh.scale.z;
+      }
+
+      const newX = mesh.position.x;
+      const newY = mesh.position.y - currentH / 2;
+      const newZ = mesh.position.z;
+
+      if (edX) {
+        edX.value = newX.toFixed(2);
+        edY.value = newY.toFixed(2);
+        edZ.value = newZ.toFixed(2);
+        
+        if (tControls.getMode() === 'scale') {
+           edW.value = currentW.toFixed(2);
+           edH.value = currentH.toFixed(2);
+           edD.value = currentD.toFixed(2);
+        }
+      }
+
+      block.collider.minX = newX - currentW / 2;
+      block.collider.maxX = newX + currentW / 2;
+      block.collider.minY = newY;
+      block.collider.maxY = newY + currentH;
+      block.collider.minZ = newZ - currentD / 2;
+      block.collider.maxZ = newZ + currentD / 2;
+    });
+
+    tControls.addEventListener('dragging-changed', (e) => {
+        isDraggingTControls = e.value;
+        if (!e.value && tControls.object) {
+            const mesh = tControls.object;
+            const block = blockObjects.find(b => b.mesh === mesh);
+            if (block) {
+                const currentW = block.w * mesh.scale.x;
+                const currentH = block.h * mesh.scale.y;
+                const currentD = block.d * mesh.scale.z;
+                
+                block.x = mesh.position.x;
+                block.y = mesh.position.y - currentH / 2;
+                block.z = mesh.position.z;
+                
+                block.w = currentW;
+                block.h = currentH;
+                block.d = currentD;
+
+                mesh.geometry.dispose();
+                mesh.geometry = new THREE.BoxGeometry(block.w, block.h, block.d);
+                mesh.scale.set(1, 1, 1);
+                mesh.position.set(block.x, block.y + block.h / 2, block.z);
+
+                tControls.detach();
+                tControls.attach(mesh);
+            }
+        }
+    });
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    let camYaw = 0;   
+    let camPitch = 0.3; 
+    let isDragging = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+
+    window.addEventListener('mousedown', (e) => {
+      if(e.target.closest('#editor-ui') || e.target.closest('#room-ui') || e.target.closest('#explorer-ui')) return;
+      if (isDraggingTControls) return; 
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      
+      if (edSelect) {
+        raycaster.setFromCamera(mouse, camera);
+        
+        const meshes = blockObjects.map(b => b.mesh);
+        const intersects = raycaster.intersectObjects(meshes);
+
+        if (intersects.length > 0) {
+          const hitMesh = intersects[0].object;
+          const block = blockObjects.find(b => b.mesh === hitMesh);
+          if (block) {
+            edSelect.value = block.id;
+            loadSelectedBlock(); 
+          }
+        } else {
+          edSelect.value = "";
+          loadSelectedBlock();
+        }
+      }
+
+      isDragging = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    
+    window.addEventListener('mousemove', (e) => {
+      if (isDraggingTControls) return; 
+      if (!isDragging || !isThirdPerson) return;
+      const deltaX = e.clientX - prevMouseX;
+      const deltaY = e.clientY - prevMouseY;
+      camYaw -= deltaX * 0.008;
+      camPitch = Math.max(0.05, Math.min(1.2, camPitch + deltaY * 0.008));
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+
+    function updateExplorerHighlights() {
+      if (!explorerList || !edSelect) return;
+      const items = explorerList.getElementsByClassName('explorer-item');
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].dataset.id === edSelect.value) {
+          items[i].classList.add('selected');
+        } else {
+          items[i].classList.remove('selected');
+        }
+      }
+    }
+
+    function updateBlockSelect() {
+      if (!edSelect || !explorerList) return;
+      const currentVal = edSelect.value;
+      edSelect.innerHTML = '<option value="">-- None Selected --</option>';
+      explorerList.innerHTML = '';
+      
+      blockObjects.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.innerText = `Block ${b.id}`;
+        edSelect.appendChild(opt);
+
+        const expItem = document.createElement('div');
+        expItem.className = 'explorer-item';
+        expItem.dataset.id = b.id;
+        
+        const hexColor = b.color.toString(16).padStart(6, '0');
+        expItem.innerHTML = `<span style="display:inline-block;width:10px;height:10px;background-color:#${hexColor};margin-right:6px;border:1px solid #999;"></span>Block ${b.id}`;
+        
+        expItem.onclick = () => {
+          edSelect.value = b.id;
+          loadSelectedBlock();
+        };
+        explorerList.appendChild(expItem);
+      });
+      
+      if (currentVal) {
+          edSelect.value = currentVal;
+          updateExplorerHighlights();
+      }
+    }
+
+    function loadSelectedBlock() {
+      if (!edSelect) {
+        tControls.detach();
+        return;
+      }
+      if (!edSelect.value) {
+        edX.value = ''; edY.value = ''; edZ.value = '';
+        edW.value = ''; edH.value = ''; edD.value = ''; edColor.value = '#ffffff';
+        tControls.detach();
+        updateExplorerHighlights();
+        return;
+      }
+      const block = blockObjects.find(b => b.id == edSelect.value);
+      if (block) {
+        edX.value = block.x.toFixed(2);
+        edY.value = block.y.toFixed(2);
+        edZ.value = block.z.toFixed(2);
+        edW.value = block.w.toFixed(2);
+        edH.value = block.h.toFixed(2);
+        edD.value = block.d.toFixed(2);
+        edColor.value = '#' + block.color.toString(16).padStart(6, '0');
+        tControls.attach(block.mesh);
+      }
+      updateExplorerHighlights();
+    }
+
+    if (edSelect) {
+      edSelect.addEventListener('change', loadSelectedBlock);
+    }
+
+    if (edApply) {
+      edApply.addEventListener('click', () => {
+        if (!edSelect.value) return;
+        const block = blockObjects.find(b => b.id == edSelect.value);
+        if (block) {
+          const nx = parseFloat(edX.value) || 0;
+          const ny = parseFloat(edY.value) || 0;
+          const nz = parseFloat(edZ.value) || 0;
+          const nw = parseFloat(edW.value) || 1;
+          const nh = parseFloat(edH.value) || 1;
+          const nd = parseFloat(edD.value) || 1;
+          const nc = parseInt(edColor.value.replace('#', '0x'), 16) || 0xffffff;
+
+          block.mesh.geometry.dispose();
+          block.mesh.geometry = new THREE.BoxGeometry(nw, nh, nd);
+          block.mesh.material.color.setHex(nc);
+          block.mesh.position.set(nx, ny + nh / 2, nz);
+          block.mesh.scale.set(1, 1, 1);
+
+          block.x = nx; block.y = ny; block.z = nz;
+          block.w = nw; block.h = nh; block.d = nd;
+          block.color = nc;
+
+          block.collider.minX = nx - nw / 2;
+          block.collider.maxX = nx + nw / 2;
+          block.collider.minY = ny;
+          block.collider.maxY = ny + nh;
+          block.collider.minZ = nz - nd / 2;
+          block.collider.maxZ = nz + nd / 2;
+
+          if (tControls.object === block.mesh) {
+              tControls.detach();
+              tControls.attach(block.mesh);
+          }
+          
+          updateBlockSelect(); 
+        }
+      });
+    }
+
+    if (edDelete) {
+      edDelete.addEventListener('click', () => {
+        if (!edSelect.value) return;
+        const id = edSelect.value;
+        const index = blockObjects.findIndex(b => b.id == id);
+        if (index > -1) {
+          const block = blockObjects[index];
+          tControls.detach();
+          scene.remove(block.mesh);
+          
+          const colIndex = colliders.indexOf(block.collider);
+          if (colIndex > -1) colliders.splice(colIndex, 1);
+          
+          blockObjects.splice(index, 1);
+          edSelect.value = "";
+          updateBlockSelect();
+          loadSelectedBlock();
+        }
+      });
+    }
+
+    if (edAdd) {
+      edAdd.addEventListener('click', () => {
+        addBlock(0, 0, 0, 2, 2, 2, 0xffffff);
+        edSelect.value = blockIdCounter;
+        loadSelectedBlock();
+      });
+    }
+
+    function addBlock(x, y, z, w, h, d, color) {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const mat = new THREE.MeshLambertMaterial({ color: color, flatShading: true });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y + h / 2, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+
+      const collider = {
+        minX: x - w / 2, maxX: x + w / 2,
+        minY: y, maxY: y + h,
+        minZ: z - d / 2, maxZ: z + d / 2
+      };
+      colliders.push(collider);
+
+      blockIdCounter++;
+      blockObjects.push({
+        id: blockIdCounter,
+        x: x, y: y, z: z, w: w, h: h, d: d, color: color,
+        mesh: mesh, collider: collider
+      });
+
+      updateBlockSelect();
+    }
+
+    // === INITIAL_BLOCKS_START ===
+    addBlock(-8, 0, -10, 4, 0.6, 4, 0xaaaaaa);
+    addBlock(5, 0, 5, 3, 2, 3, 0xff0055);
+    addBlock(-6, 0, 6, 3, 3, 3, 0x0055ff);
+    addBlock(10, 0, -5, 2, 4, 2, 0xffaa00);
+    addBlock(0, 0, 12, 4, 2, 4, 0xaa00ff);
+    // === INITIAL_BLOCKS_END ===
+
+    function checkHorizontalCollision(px, pz, pyHeight) {
+      const radius = 0.45;
+      for (let c of colliders) {
+        if (pyHeight < c.maxY && (pyHeight + 1.8) > c.minY) {
+          const closestX = Math.max(c.minX, Math.min(px, c.maxX));
+          const closestZ = Math.max(c.minZ, Math.min(pz, c.maxZ));
+          const dx = px - closestX;
+          const dz = pz - closestZ;
+          if ((dx * dx + dz * dz) < (radius * radius)) return true;
+        }
+      }
+      return false;
+    }
+
+    function getFloorY(px, pz) {
+      let highestY = 0;
+      const r = 0.35;
+      for (let c of colliders) {
+        if (px + r > c.minX && px - r < c.maxX && pz + r > c.minZ && pz - r < c.maxZ) {
+          if (c.maxY > highestY) highestY = c.maxY;
+        }
+      }
+      return highestY + groundBaseY;
+    }
+
+    const playerGroup = new THREE.Group();
+    const groundBaseY = 1.0;
+    playerGroup.position.set(0, groundBaseY, 0);
+    scene.add(playerGroup);
+
+    let isThirdPerson = true;
+    let velocityY = 0;
+    let isGrounded = true;
+    const gravity = -0.012;
+    const jumpStrength = 0.28;
+    const speed = 0.12;
+    const keys = {};
+    let lastSend = 0;
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      keys[e.key.toLowerCase()] = true;
+      if (e.key === ' ') e.preventDefault();
+      if (e.key.toLowerCase() === 'v') isThirdPerson = !isThirdPerson;
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const dist = 7;
+      const camOffsetX = dist * Math.sin(camYaw) * Math.cos(camPitch);
+      const camOffsetY = dist * Math.sin(camPitch) + 1.5;
+      const camOffsetZ = dist * Math.cos(camYaw) * Math.cos(camPitch);
+
+      const forward = new THREE.Vector3(-camOffsetX, 0, -camOffsetZ).normalize();
+      const right = forward.clone().cross(new THREE.Vector3(0, 1, 0)).normalize();
+
+      const moveVector = new THREE.Vector3(0, 0, 0);
+      if (keys['w'] || keys['arrowup']) moveVector.add(forward);
+      if (keys['s'] || keys['arrowdown']) moveVector.sub(forward);
+      if (keys['d'] || keys['arrowright']) moveVector.add(right);
+      if (keys['a'] || keys['arrowleft']) moveVector.sub(right);
+
+      const isMoving = moveVector.lengthSq() > 0;
+      if (isMoving) {
+        moveVector.normalize();
+        const targetX = Math.max(-mapLimit, Math.min(mapLimit, playerGroup.position.x + moveVector.x * speed));
+        if (!checkHorizontalCollision(targetX, playerGroup.position.z, playerGroup.position.y - groundBaseY)) {
+          playerGroup.position.x = targetX;
+        }
+        const targetZ = Math.max(-mapLimit, Math.min(mapLimit, playerGroup.position.z + moveVector.z * speed));
+        if (!checkHorizontalCollision(playerGroup.position.x, targetZ, playerGroup.position.y - groundBaseY)) {
+          playerGroup.position.z = targetZ;
+        }
+      }
+
+      const currentGroundY = getFloorY(playerGroup.position.x, playerGroup.position.z);
+
+      if (keys[' '] && isGrounded) {
+        velocityY = jumpStrength;
+        isGrounded = false;
+      }
+
+      if (isGrounded) {
+        if (playerGroup.position.y > currentGroundY) {
+          isGrounded = false;
+          velocityY = 0;
+        } else {
+          playerGroup.position.y = currentGroundY;
+        }
+      }
+
+      if (!isGrounded) {
+        playerGroup.position.y += velocityY;
+        velocityY += gravity;
+        if (playerGroup.position.y <= currentGroundY) {
+          playerGroup.position.y = currentGroundY;
+          velocityY = 0;
+          isGrounded = true;
+        }
+      }
+
+      let angle = camYaw % (Math.PI * 2);
+      if (angle < 0) angle += Math.PI * 2;
+
+      let currentSprite = backUrl;
+      let sideScaleMultiplier = 1.0;
+
+      if (!isGrounded) {
+        if (angle >= Math.PI / 4 && angle < 7 * Math.PI / 4) {
+          currentSprite = jumpFrontUrl;
+        } else {
+          currentSprite = jumpUrl;
+        }
+      } else if (isMoving) {
+        const step = Math.floor(Date.now() / 150) % 2;
+        if (keys['s'] || keys['arrowdown']) {
+          currentSprite = step === 0 ? walkBack1Url : walkBack2Url;
+        } else {
+          currentSprite = step === 0 ? walk1Url : walk2Url;
+        }
+      } else {
+        if (angle >= Math.PI / 4 && angle < 3 * Math.PI / 4) {
+          currentSprite = leftUrl;
+          sideScaleMultiplier = 0.82;
+        } else if (angle >= 3 * Math.PI / 4 && angle < 5 * Math.PI / 4) {
+          currentSprite = frontUrl;
+        } else if (angle >= 5 * Math.PI / 4 && angle < 7 * Math.PI / 4) {
+          currentSprite = rightUrl;
+          sideScaleMultiplier = 0.82;
+        } else {
+          currentSprite = backUrl;
+        }
+      }
+
+      if (playerImgOverlay.src !== currentSprite) {
+        playerImgOverlay.src = currentSprite;
+      }
+
+      if (Date.now() - lastSend > 50) {
+        for (let peerId in connections) {
+          connections[peerId].send({
+            type: 'move',
+            x: playerGroup.position.x,
+            y: playerGroup.position.y,
+            z: playerGroup.position.z,
+            sprite: currentSprite
+          });
+        }
+        lastSend = Date.now();
+      }
+
+      if (isThirdPerson) {
+        fpViewmodel.style.display = 'none';
+
+        const camPos = playerGroup.position.clone().add(new THREE.Vector3(camOffsetX, camOffsetY, camOffsetZ));
+        camera.position.copy(camPos);
+        camera.lookAt(playerGroup.position.clone().add(new THREE.Vector3(0, 0.5, 0)));
+
+        const screenPos = playerGroup.position.clone();
+        screenPos.y += 0.2;
+        screenPos.project(camera);
+
+        const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (screenPos.y * -0.5 + 0.5) * window.innerHeight;
+
+        const currentDist = camera.position.distanceTo(playerGroup.position);
+        const scale = Math.max(0.4, Math.min(1.8, 10 / currentDist));
+        
+        playerImgOverlay.style.display = 'block';
+        playerImgOverlay.style.left = `${x}px`;
+        playerImgOverlay.style.top = `${y}px`;
+        playerImgOverlay.style.width = `${playerBaseSize * scale * sideScaleMultiplier}px`;
+
+      } else {
+        fpViewmodel.style.display = 'block';
+
+        const headPos = playerGroup.position.clone().add(new THREE.Vector3(0, 0.5, 0));
+        camera.position.copy(headPos);
+        camera.lookAt(headPos.clone().add(forward.clone().multiplyScalar(5)));
+        playerImgOverlay.style.display = 'none';
+      }
+
+      for (let id in remotePlayers) {
+        const rp = remotePlayers[id];
+        if (rp.element.src !== rp.sprite) rp.element.src = rp.sprite;
+
+        const rpos = new THREE.Vector3(rp.x, rp.y + 0.2, rp.z);
+        rpos.project(camera);
+
+        const rx = (rpos.x * 0.5 + 0.5) * window.innerWidth;
+        const ry = (rpos.y * -0.5 + 0.5) * window.innerHeight;
+
+        if (rpos.z < 1) {
+          const rdist = camera.position.distanceTo(new THREE.Vector3(rp.x, rp.y, rp.z));
+          const rscale = Math.max(0.2, Math.min(2.0, 10 / rdist));
+          rp.element.style.display = 'block';
+          rp.element.style.left = `${rx}px`;
+          rp.element.style.top = `${ry}px`;
+          rp.element.style.width = `${playerBaseSize * rscale}px`;
+        } else {
+          rp.element.style.display = 'none';
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+  </script>
+</body>
+</html>

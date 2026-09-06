@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>NaNocks</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700');
+        :root {
+            --roblox-blue: #0076a8;
+            --roblox-dark-blue: #006085;
+            --roblox-orange: #ff5f00;
+            --roblox-gray: #f2f2f2;
+            --roblox-light-gray: #e6e6e6;
+            --roblox-border: #cccccc;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background-color: var(--roblox-gray);
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: white;
+            border-bottom: 1px solid var(--roblox-border);
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .navbar .logo {
+            padding: 10px;
+        }
+
+        .navbar .logo img {
+            height: 40px;
+        }
+
+        .navbar .search-bar {
+            display: flex;
+            flex-grow: 1;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .navbar .search-bar input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--roblox-border);
+        }
+        
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border: 1px solid var(--roblox-border);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .search-dropdown.active {
+            max-height: 300px;
+            overflow-y: auto;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .search-dropdown .search-result-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--roblox-border);
+            text-decoration: none;
+            color: black;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-dropdown .search-result-item:hover {
+            background-color: var(--roblox-light-gray);
+        }
+
+        .search-dropdown .search-result-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .search-dropdown .nothing-found {
+            padding: 10px;
+            text-align: center;
+            color: gray;
+        }
+
+        .navbar .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-icon-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .navbar .user-menu .notification-icon {
+            background-color: var(--roblox-blue);
+            color: white;
+            padding: 12px;
+        }
+
+        .notification-icon img {
+            height: 30px;
+            width: auto;
+        }
+        
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 250px;
+            background-color: white;
+            border: 1px solid var(--roblox-border);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .notification-dropdown.active {
+            max-height: 200px;
+            overflow-y: auto;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .notification-dropdown .nothing-found {
+            color: gray;
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        .navbar .user-menu .currency {
+            padding: 10px;
+            color: gray;
+        }
+
+        .navbar .user-menu .robux-balance {
+            background-color: white;
+            padding: 10px;
+            border: 1px solid var(--roblox-border);
+        }
+
+        .main-content {
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .games-section {
+            background-color: white;
+            border: 1px solid var(--roblox-border);
+            padding: 20px;
+        }
+
+        .games-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        a.game-card {
+            border: 1px solid var(--roblox-border);
+            text-align: center;
+            background-color: var(--roblox-light-gray);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .game-card-info {
+            padding: 10px;
+            text-align: left;
+        }
+
+        .game-card-info .title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .game-card-info .players {
+            font-size: 12px;
+            color: gray;
+        }
+
+        .spaceCard {
+            border: 1px solid var(--roblox-border);
+            text-align: center;
+            background-color: var(--roblox-light-gray);
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--roblox-dark-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px;
+            font-weight: 700;
+            font-size: 20px;
+            transition: background-color 0.2s;
+        }
+
+        .spaceCard:hover {
+            background-color: var(--roblox-border);
+        }
+
+        .modal {
+            position: fixed;
+            z-index: 99;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            position: relative;
+            background-color: white;
+            color: #333;
+            text-align: center;
+        }
+
+        .modal-content.game-menu-bg {
+            background-image: url('https://www.image2url.com/r2/default/files/1788363091789-4282fbc1-3238-4cc5-bd53-9329ce97ec52.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            gap: 20px;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100%;
+            border-radius: 0;
+            box-sizing: border-box;
+            padding: 40px;
+        }
+
+        .modal-left {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-left img {
+            width: 280px;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid white;
+        }
+
+        .modal-right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-right img {
+            width: 280px;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .modal-right img:hover {
+            transform: scale(1.05);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px #000;
+            cursor: pointer;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">
+            <img src="images/boblox-classic (1).png" alt="NaNocks">
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search">
+            <div id="searchResults" class="search-dropdown">
+                <div id="noResults" class="nothing-found">Nothing found</div>
+            </div>
+        </div>
+        <div class="user-menu">
+            <div class="notification-icon-container">
+                <div class="notification-icon">
+                    <img src="images/costume3 (1).png" alt="Notifications">
+                </div>
+                <div id="notificationDropdown" class="notification-dropdown">
+                    <div class="nothing-found">
+                        Nothing found
+                    </div>
+                </div>
+            </div>
+            <div class="currency">
+                <span class="robux-balance"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="games-section">
+            <div class="games-header">
+                <h2>Spaces</h2>
+                <a href="1homepage.html">Back></a>
+            </div>
+            <div id="gamesGrid" class="games-grid">
+                <img src="https://www.image2url.com/r2/default/images/1788639498570-54abd9e4-2daa-4773-8f23-e91c45450455.png" style="height: 180px; width: auto; float: right; margin-right: 15px;">
+                <a href="spacemake.html" class="spaceCard">
+                    Make Space!
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameModal" class="modal">
+        <div class="modal-content game-menu-bg">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <div class="modal-left">
+                <img id="modalGameThumb" src="" alt="Game Thumbnail">
+            </div>
+            <div class="modal-right">
+                <a id="modalPlayLink" href="#">
+                    <img src="https://www.image2url.com/r2/default/files/1788363144412-46895edb-82d4-4d81-80ef-32b4ef8bac05.png" alt="Play Game">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('gameModal');
+            const modalThumb = document.getElementById('modalGameThumb');
+            const modalPlayLink = document.getElementById('modalPlayLink');
+            const modalClose = document.getElementById('modalClose');
+
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const targetHref = card.getAttribute('href');
+                    const cardImg = card.querySelector('img');
+                    const thumbSrc = cardImg ? cardImg.src : '';
+
+                    modalThumb.src = thumbSrc;
+                    modalPlayLink.href = targetHref;
+
+                    modal.classList.add('active');
+                });
+            });
+
+            modalClose.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
