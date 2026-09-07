@@ -7,216 +7,173 @@
     <title>NaNocks</title>
     <style>
         @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700');
+
         :root {
-            --roblox-blue: #0076a8;
-            --roblox-dark-blue: #006085;
-            --roblox-orange: #ff5f00;
-            --roblox-gray: #f2f2f2;
-            --roblox-light-gray: #e6e6e6;
-            --roblox-border: #cccccc;
+            --bg-gray: #e6e6e6;
+            --border-gray: #b0b0b0;
+            --text-gray: #7d7d7d;
         }
 
         body {
             font-family: 'Source Sans Pro', sans-serif;
-            background-color: var(--roblox-gray);
+            background-color: var(--bg-gray);
             margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .header {
+            padding: 15px 40px 5px 40px;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .logo-container img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
         }
 
         .navbar {
-            background-color: white;
-            border-bottom: 1px solid var(--roblox-border);
-            padding: 0 10px;
+            border-top: 2px solid var(--border-gray);
+            border-bottom: 2px solid var(--border-gray);
+            padding: 6px 40px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            position: relative;
+            font-size: 24px;
+            color: #a0a0a0;
+            background-color: #ededed;
         }
 
-        .navbar .logo {
-            padding: 10px;
-        }
-
-        .navbar .logo img {
-            height: 40px;
-        }
-
-        .navbar .search-bar {
+        .nav-links {
             display: flex;
-            flex-grow: 1;
-            margin: 0 20px;
-            position: relative;
+            gap: 10px;
+            align-items: center;
         }
 
-        .navbar .search-bar input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--roblox-border);
-        }
-        
-        .search-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background-color: white;
-            border: 1px solid var(--roblox-border);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            z-index: 10;
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease-in-out;
+        .nav-links span {
+            color: #a0a0a0;
         }
 
-        .search-dropdown.active {
-            max-height: 300px;
-            overflow-y: auto;
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .search-dropdown .search-result-item {
-            padding: 10px;
-            border-bottom: 1px solid var(--roblox-border);
+        .nav-links a {
+            color: #a0a0a0;
             text-decoration: none;
-            color: black;
+        }
+
+        .search-container {
             display: flex;
+            align-items: center;
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+
+        .search-container input {
+            border: none;
+            border-bottom: 2px solid #a0a0a0;
+            background: transparent;
+            width: 100%;
+            max-width: 400px;
+            font-size: 20px;
+            outline: none;
+            padding-left: 5px;
+        }
+
+        .main-layout {
+            display: flex;
+            padding: 30px 40px;
+            gap: 40px;
+        }
+
+        .sidebar {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
         }
 
-        .search-dropdown .search-result-item:hover {
-            background-color: var(--roblox-light-gray);
-        }
-
-        .search-dropdown .search-result-item img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            margin-right: 10px;
-        }
-
-        .search-dropdown .nothing-found {
-            padding: 10px;
+        .username-box {
+            width: 100%;
+            background-color: #d9d9d9;
+            border: 1px solid var(--border-gray);
             text-align: center;
-            color: gray;
+            padding: 8px 0;
+            font-size: 26px;
+            color: #a0a0a0;
+            font-weight: 600;
         }
 
-        .navbar .user-menu {
+        .avatar-box {
+            width: 100%;
+            height: 320px;
+            background-color: #d9d9d9;
+            border: 1px solid var(--border-gray);
+            border-top: none;
             display: flex;
-            align-items: center;
-        }
-
-        .notification-icon-container {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .navbar .user-menu .notification-icon {
-            background-color: var(--roblox-blue);
-            color: white;
-            padding: 12px;
-        }
-
-        .notification-icon img {
-            height: 30px;
-            width: auto;
-        }
-        
-        .notification-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            width: 250px;
-            background-color: white;
-            border: 1px solid var(--roblox-border);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            z-index: 10;
-            max-height: 0;
+            justify-content: center;
+            align-items: flex-end;
             overflow: hidden;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease-in-out;
         }
 
-        .notification-dropdown.active {
-            max-height: 200px;
-            overflow-y: auto;
-            opacity: 1;
-            visibility: visible;
+        .avatar-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
-        .notification-dropdown .nothing-found {
-            color: gray;
-            font-size: 14px;
-            padding: 10px;
+        .content-area {
+            flex-grow: 1;
         }
 
-        .navbar .user-menu .currency {
-            padding: 10px;
-            color: gray;
-        }
-
-        .navbar .user-menu .robux-balance {
-            background-color: white;
-            padding: 10px;
-            border: 1px solid var(--roblox-border);
-        }
-
-        .main-content {
-            padding: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .games-section {
-            background-color: white;
-            border: 1px solid var(--roblox-border);
-            padding: 20px;
-        }
-
-        .games-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .section-title {
+            font-size: 20px;
+            color: #a0a0a0;
+            margin-bottom: 15px;
         }
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
         }
 
-        a.game-card {
-            border: 1px solid var(--roblox-border);
-            text-align: center;
-            background-color: var(--roblox-light-gray);
-            cursor: pointer;
+        .game-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-decoration: none;
             color: inherit;
-            display: block;
+            cursor: pointer;
         }
 
-        .game-card img {
+        .game-thumb-frame {
+            border: 6px solid #b0b0b0;
+            background-color: #fff;
             width: 100%;
-            height: 100px;
+            aspect-ratio: 1.4;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .game-thumb-frame img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
         }
 
-        .game-card-info {
-            padding: 10px;
-            text-align: left;
-        }
-
-        .game-card-info .title {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .game-card-info .players {
-            font-size: 12px;
-            color: gray;
+        .game-title {
+            margin-top: 8px;
+            font-size: 22px;
+            color: #a0a0a0;
+            text-align: center;
         }
 
         .modal {
@@ -239,13 +196,6 @@
             opacity: 1;
             visibility: visible;
         }
-        
-        .modal-content {
-            position: relative;
-            background-color: white;
-            color: #333;
-            text-align: center;
-        }
 
         .modal-content.game-menu-bg {
             background-image: url('https://www.image2url.com/r2/default/files/1788363091789-4282fbc1-3238-4cc5-bd53-9329ce97ec52.png');
@@ -258,16 +208,9 @@
             width: 100vw;
             height: 100vh;
             max-width: 100%;
-            border-radius: 0;
             box-sizing: border-box;
             padding: 40px;
-        }
-
-        .modal-left {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative;
         }
 
         .modal-left img {
@@ -276,13 +219,6 @@
             object-fit: cover;
             border-radius: 6px;
             border: 2px solid white;
-        }
-
-        .modal-right {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .modal-right img {
@@ -311,178 +247,176 @@
 </head>
 <body>
 
-    <div class="navbar">
-        <div class="logo">
+    <div class="header">
+        <div class="logo-container">
             <img src="images/boblox-classic (1).png" alt="NaNocks">
-        </div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search">
-            <div id="searchResults" class="search-dropdown">
-                <div id="noResults" class="nothing-found">Nothing found</div>
-            </div>
-        </div>
-        <div class="user-menu">
-            <div class="notification-icon-container">
-                <div class="notification-icon">
-                    <img src="images/costume3 (1).png" alt="Notifications">
-                </div>
-                <div id="notificationDropdown" class="notification-dropdown">
-                    <div class="nothing-found">
-                        Nothing found
-                    </div>
-                </div>
-            </div>
-            <div class="currency">
-                <span class="robux-balance"></span>
-            </div>
         </div>
     </div>
 
-    <div class="main-content">
+    <div class="navbar">
+        <div class="nav-links">
+            <a href="space.html">Spaces</a>
+            <span>|</span>
+            <a href="#">Players</a>
+            <span>|</span>
+            <a href="info.html">Creator</a>
+            <span>|</span>
+            <a href="#">Questions</a>
+            <span>|</span>
+        </div>
+        <div class="search-container">
+            <span style="margin-right: 5px;">SEARCH</span>
+            <input type="text" id="searchInput">
+        </div>
+    </div>
+
+    <div class="main-layout">
         
-        <div class="games-section">
-            <div class="games-header">
-                <h2>Featured Games</h2>
-                <a href="space.html">Your Spaces!></a>
-                <a href="info.html">Upload Games></a>
+        <div class="sidebar">
+            <div class="username-box">You</div>
+            <div class="avatar-box">
+                <img src="https://www.image2url.com/r2/default/images/1788337493222-2d9d0e3c-6b09-410f-b3aa-d8d6be10133a.png" alt="User Avatar">
             </div>
+        </div>
+
+        <div class="content-area">
+            <div class="section-title">Epic games!:</div>
+
             <div id="gamesGrid" class="games-grid">
-                <img src="https://www.image2url.com/r2/default/images/1788337493222-2d9d0e3c-6b09-410f-b3aa-d8d6be10133a.png" style="height: 180px; width: auto; float: left; margin-right: 15px;">
-                <a href="obby.html" class="game-card" data-title="New Experience Thumbnail">
-                    <img src="https://ia903103.us.archive.org/6/items/image-4_202608/image%20%284%29.png" alt="My New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">Cool, Cool Obbys forest</div>
-                        <div class="players">Made By Staff</div>
+                
+                <a href="obby.html" class="game-card" data-title="GrassyHill">
+                    <div class="game-thumb-frame">
+                        <img src="https://static.yooco.de/n2/5a/812443/u/9e/3931411/images/gallery/medium/637cea09412889e98746a10902e65205.jpg" alt="GrassyHill">
                     </div>
+                    <div class="game-title">GrassyHill</div>
                 </a>
 
                 <a href="game3.html" class="game-card" data-title="Game">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
 
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
                 <a href="game3.html" class="game-card" data-title="New Experience">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="New Experience Thumbnail">
-                    <div class="game-card-info">
-                        <div class="title">free</div>
-                        <div class="players">12 Players</div>
+                    <div class="game-thumb-frame">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wr040CAysx_OoeEzaLR6Ns5y_7HNDIH-kRm4slTQIg&s=10" alt="free">
                     </div>
+                    <div class="game-title">free</div>
                 </a>
+
             </div>
         </div>
     </div>
